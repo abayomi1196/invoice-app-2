@@ -1,9 +1,53 @@
+<script>
+import { onMounted, reactive, toRefs } from "vue";
+import AppNavigation from "@/components/AppNavigation.vue";
+
+export default {
+  name: "App",
+  components: {
+    AppNavigation,
+  },
+  setup() {
+    const state = reactive({
+      isMobile: false,
+    });
+
+    function checkScreen() {
+      const windowWidth = window.innerWidth;
+
+      if (windowWidth <= 750) {
+        state.isMobile = true;
+        return;
+      }
+      state.isMobile = false;
+    }
+
+    // check the screen inner width on mounts, and update state accordingly
+    onMounted(() => {
+      checkScreen();
+      window.addEventListener("resize", checkScreen);
+    });
+
+    return { ...toRefs(state) };
+  },
+};
+</script>
+
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div>
+    <div v-if="!isMobile" class="app flex">
+      <AppNavigation />
+
+      <div class="app-content flex flex-column">
+        <router-view />
+      </div>
+    </div>
+
+    <div v-else class="mobile-message flex flex-column">
+      <h2>Sorry, this app is not supported on mobile devices!</h2>
+      <p>To use this app, please use a computer or tablet!</p>
+    </div>
   </div>
-  <router-view />
 </template>
 
 <style lang="scss">
@@ -14,7 +58,35 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
+}
+
+.app {
   background-color: #141625;
+  min-height: 100vh;
+  flex-direction: column;
+
+  @media (min-width: 900px) {
+    flex-direction: row;
+  }
+}
+
+.mobile-message {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #141625;
+  color: #fff;
+
+  p {
+    margin-top: 16px;
+  }
+}
+
+.app-content {
+  padding: 0 20px;
+  flex: 1;
+  position: relative;
 }
 
 button,
