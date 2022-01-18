@@ -1,11 +1,13 @@
 <script>
 import { onMounted, reactive, toRefs } from "vue";
 import AppNavigation from "@/components/AppNavigation.vue";
+import AppInvoiceModal from "@/components/AppInvoiceModal.vue";
 
 export default {
   name: "App",
   components: {
     AppNavigation,
+    AppInvoiceModal,
   },
   setup() {
     const state = reactive({
@@ -40,6 +42,8 @@ export default {
 
       <div class="app-content flex flex-column">
         <router-view />
+
+        <AppInvoiceModal />
       </div>
     </div>
 
