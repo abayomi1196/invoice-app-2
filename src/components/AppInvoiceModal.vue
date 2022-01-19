@@ -1,6 +1,7 @@
 <script>
 import { reactive, toRefs, watch } from "vue";
 import { useStore } from "vuex";
+import { uid } from "uid";
 
 export default {
   name: "Invoice Modal",
@@ -30,6 +31,22 @@ export default {
       invoiceTotal: 0,
     });
 
+    function addNewInvoiceItem() {
+      state.invoiceItemList.push({
+        id: uid(),
+        itemName: "",
+        qty: "",
+        price: 0,
+        total: 0,
+      });
+    }
+
+    function deleteInvoiceItem(id) {
+      state.invoiceItemList = state.invoiceItemList.filter(
+        (item) => item.id !== id
+      );
+    }
+
     // get current date for invoice date field
     state.invoiceDateUnix = Date.now();
     state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
@@ -53,6 +70,8 @@ export default {
 
     return {
       ...toRefs(state),
+      addNewInvoiceItem,
+      deleteInvoiceItem,
       closeInvoice: () => store.commit("TOGGLE_INVOICE_MODAL"),
     };
   },
@@ -318,19 +337,18 @@ export default {
     font-size: 12px;
     margin-bottom: 6px;
   }
+}
+input,
+select {
+  width: 100%;
+  background-color: #1e2139;
+  color: #fff;
+  border-radius: 4px;
+  padding: 12px 4px;
+  border: none;
 
-  input,
-  select {
-    width: 100%;
-    background-color: #1e2139;
-    color: #fff;
-    border-radius: 4px;
-    padding: 12px 4px;
-    border: none;
-
-    &:focus {
-      outline: none;
-    }
+  &:focus {
+    outline: none;
   }
 }
 
@@ -402,6 +420,7 @@ table.item-list {
       width: 12px;
       height: 16px;
       object-fit: cover;
+      cursor: pointer;
     }
   }
 }
