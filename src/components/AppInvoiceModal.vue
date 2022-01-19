@@ -2,13 +2,15 @@
 import { reactive, toRefs, watch } from "vue";
 import { useStore } from "vuex";
 import { uid } from "uid";
+import { collection, addDoc } from "firebase/firestore";
+
+import db from "@/firebase/firebaseInit.js";
 
 export default {
   name: "Invoice Modal",
   setup() {
     const store = useStore();
     const state = reactive({
-      dateOptions: { year: "numeric", month: "short", day: "numeric" },
       billerStreetAddress: "",
       billerCity: "",
       billerZipCode: "",
@@ -25,11 +27,13 @@ export default {
       paymentDueDateUnix: "",
       paymentDueDate: "",
       productDescription: "",
-      invoicePending: "",
-      invoiceDraft: "",
+      invoicePending: false,
+      invoiceDraft: false,
       invoiceItemList: [],
       invoiceTotal: 0,
     });
+
+    const dateOptions = { year: "numeric", month: "short", day: "numeric" };
 
     function addNewInvoiceItem() {
       state.invoiceItemList.push({
@@ -47,11 +51,47 @@ export default {
       );
     }
 
+    function publishInvoice() {
+      state.invoicePending = true;
+    }
+
+    function saveDraft() {
+      state.invoiceDraft = true;
+    }
+
+    function calcInvoiceTotal() {
+      state.invoiceTotal = 0;
+      state.invoiceItemList.forEach((item) => {
+        state.invoiceTotal += item.total;
+      });
+    }
+
+    async function uploadInvoice() {
+      if (state.invoiceItemList.length <= 0) {
+        alert("Please ensure you've filled out work items");
+        return;
+      }
+      calcInvoiceTotal();
+
+      const invoiceCollectionRef = collection(db, "invoices");
+
+      await addDoc(invoiceCollectionRef, {
+        invoiceId: uid(6),
+        ...state,
+      });
+
+      store.commit("TOGGLE_INVOICE_MODAL");
+    }
+
+    function handleSubmitForm() {
+      uploadInvoice();
+    }
+
     // get current date for invoice date field
     state.invoiceDateUnix = Date.now();
     state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
       "en-US",
-      state.dateOptions
+      dateOptions
     );
 
     // update paymentDueDate based on changes to paymentTerms
@@ -64,7 +104,7 @@ export default {
         );
         state.paymentDueDate = new Date(
           state.paymentDueDateUnix
-        ).toLocaleDateString("en-US", state.dateOptions);
+        ).toLocaleDateString("en-US", dateOptions);
       }
     );
 
@@ -72,6 +112,9 @@ export default {
       ...toRefs(state),
       addNewInvoiceItem,
       deleteInvoiceItem,
+      publishInvoice,
+      saveDraft,
+      handleSubmitForm,
       closeInvoice: () => store.commit("TOGGLE_INVOICE_MODAL"),
     };
   },
@@ -249,7 +292,9 @@ export default {
                 <td class="price">
                   <input type="text" v-model="item.price" />
                 </td>
-                <td class="total flex">$</td>
+                <td class="total flex">
+                  ${{ (item.total = item.price * item.qty) }}
+                </td>
 
                 <img
                   @click="deleteInvoiceItem(item.id)"
