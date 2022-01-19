@@ -1,5 +1,5 @@
 <script>
-import { reactive, toRefs, watch } from "vue";
+import { reactive, toRefs, watch, ref } from "vue";
 import { useStore } from "vuex";
 import { uid } from "uid";
 import { collection, addDoc } from "firebase/firestore";
@@ -39,6 +39,10 @@ export default {
     });
 
     const dateOptions = { year: "numeric", month: "short", day: "numeric" };
+
+    const invoiceWrapper = ref(null);
+
+    console.log(invoiceWrapper.value);
 
     function addNewInvoiceItem() {
       state.invoiceItemList.push({
@@ -116,6 +120,13 @@ export default {
       }
     );
 
+    function checkClick(e) {
+      // check if we are clicking on the invoice wrapper not the invoice modal-form
+      if (e.target === invoiceWrapper.value) {
+        store.commit("TOGGLE_MODAL");
+      }
+    }
+
     return {
       ...toRefs(state),
       addNewInvoiceItem,
@@ -123,6 +134,8 @@ export default {
       publishInvoice,
       saveDraft,
       handleSubmitForm,
+      checkClick,
+      invoiceWrapper,
       closeInvoice: () => store.commit("TOGGLE_INVOICE_MODAL"),
     };
   },
@@ -130,7 +143,11 @@ export default {
 </script>
 
 <template>
-  <div class="invoice-wrap flex flex-column">
+  <div
+    @click="checkClick"
+    ref="invoiceWrapper"
+    class="invoice-wrap flex flex-column"
+  >
     <form @submit.prevent="handleSubmitForm" class="invoice-content">
       <AppLoading v-show="isLoading" />
       <h1>New Invoice</h1>
@@ -325,13 +342,19 @@ export default {
       <!-- save/exit buttons -->
       <div class="save flex">
         <div class="left">
-          <button @click="closeInvoice" class="red">Cancel</button>
+          <button type="button" @click="closeInvoice" class="red">
+            Cancel
+          </button>
         </div>
 
         <div class="right flex">
-          <button @click="saveDraft" class="dark-purple">Save Draft</button>
+          <button type="submit" @click="saveDraft" class="dark-purple">
+            Save Draft
+          </button>
 
-          <button @click="publishInvoice" class="purple">Create Invoice</button>
+          <button type="submit" @click="publishInvoice" class="purple">
+            Create Invoice
+          </button>
         </div>
       </div>
     </form>

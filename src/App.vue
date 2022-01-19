@@ -4,12 +4,14 @@ import { useStore } from "vuex";
 
 import AppNavigation from "@/components/AppNavigation.vue";
 import AppInvoiceModal from "@/components/AppInvoiceModal.vue";
+import AppModal from "@/components/AppModal.vue";
 
 export default {
   name: "App",
   components: {
     AppNavigation,
     AppInvoiceModal,
+    AppModal,
   },
   setup() {
     const store = useStore();
@@ -36,6 +38,7 @@ export default {
     return {
       ...toRefs(state),
       isInvoiceModalOpen: computed(() => store.state.isInvoiceModalOpen),
+      isModalOpen: computed(() => store.state.isModalOpen),
     };
   },
 };
@@ -49,6 +52,7 @@ export default {
       <div class="app-content flex flex-column">
         <router-view />
 
+        <AppModal v-if="isModalOpen" />
         <transition name="invoice">
           <AppInvoiceModal v-if="isInvoiceModalOpen" />
         </transition>
