@@ -29,6 +29,13 @@ export default {
       invoiceTotal: 0,
     });
 
+    // get current date for invoice date field
+    state.invoiceDateUnix = Date.now();
+    state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
+      "en-US",
+      { year: "numeric", month: "short", day: "numeric" }
+    );
+
     return {
       ...toRefs(state),
       closeInvoice: () => store.commit("TOGGLE_INVOICE_MODAL"),
