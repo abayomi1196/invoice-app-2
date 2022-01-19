@@ -1,9 +1,11 @@
 <script>
 import { reactive, toRefs } from "vue";
+import { useStore } from "vuex";
 
 export default {
   name: "Invoice Modal",
   setup() {
+    const store = useStore();
     const state = reactive({
       billerStreetAddress: "",
       billerCity: "",
@@ -29,6 +31,7 @@ export default {
 
     return {
       ...toRefs(state),
+      closeInvoice: () => store.commit("TOGGLE_INVOICE_MODAL"),
     };
   },
 };

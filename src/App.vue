@@ -1,5 +1,7 @@
 <script>
-import { onMounted, reactive, toRefs } from "vue";
+import { onMounted, reactive, toRefs, computed } from "vue";
+import { useStore } from "vuex";
+
 import AppNavigation from "@/components/AppNavigation.vue";
 import AppInvoiceModal from "@/components/AppInvoiceModal.vue";
 
@@ -10,6 +12,7 @@ export default {
     AppInvoiceModal,
   },
   setup() {
+    const store = useStore();
     const state = reactive({
       isMobile: false,
     });
@@ -30,7 +33,10 @@ export default {
       window.addEventListener("resize", checkScreen);
     });
 
-    return { ...toRefs(state) };
+    return {
+      ...toRefs(state),
+      isInvoiceModalOpen: computed(() => store.state.isInvoiceModalOpen),
+    };
   },
 };
 </script>
@@ -43,7 +49,7 @@ export default {
       <div class="app-content flex flex-column">
         <router-view />
 
-        <AppInvoiceModal />
+        <AppInvoiceModal v-if="isInvoiceModalOpen" />
       </div>
     </div>
 

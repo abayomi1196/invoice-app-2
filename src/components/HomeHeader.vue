@@ -1,10 +1,12 @@
 <script>
 import { reactive, toRefs } from "vue";
+import { useStore } from "vuex";
 
 export default {
   name: "HomeHeader",
 
   setup() {
+    const store = useStore();
     const state = reactive({
       showFilterMenu: false,
       toggleStatus: "Filter by status",
@@ -14,12 +16,10 @@ export default {
       state.showFilterMenu = !state.showFilterMenu;
     }
 
-    function toggleNewInvoice() {}
-
     return {
       ...toRefs(state),
       toggleFilterMenu,
-      toggleNewInvoice,
+      toggleInvoiceModal: () => store.commit("TOGGLE_INVOICE_MODAL"),
     };
   },
 };
@@ -48,7 +48,7 @@ export default {
         </ul>
       </div>
 
-      <div class="button flex" @click="toggleNewInvoice">
+      <div class="button flex" @click="toggleInvoiceModal">
         <div class="inner-button flex">
           <img src="@/assets/icon-plus.svg" alt="add icon" />
         </div>
