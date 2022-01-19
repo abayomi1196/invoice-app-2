@@ -251,7 +251,11 @@ export default {
   background-color: transparent;
   width: 100%;
   height: 100vh;
-  overflow-y: scroll;
+  overflow: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (min-width: 900px) {
     left: 90px;

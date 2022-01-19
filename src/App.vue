@@ -49,7 +49,9 @@ export default {
       <div class="app-content flex flex-column">
         <router-view />
 
-        <AppInvoiceModal v-if="isInvoiceModalOpen" />
+        <transition name="invoice">
+          <AppInvoiceModal v-if="isInvoiceModalOpen" />
+        </transition>
       </div>
     </div>
 
@@ -97,6 +99,17 @@ export default {
   padding: 0 20px;
   flex: 1;
   position: relative;
+}
+
+/* animated invoice modal */
+.invoice-enter-active,
+.invoice-leave-active {
+  transition: 0.8s ease all;
+}
+
+.invoice-enter-from,
+.invoice-leave-to {
+  transform: translateX(-700px);
 }
 
 button,
