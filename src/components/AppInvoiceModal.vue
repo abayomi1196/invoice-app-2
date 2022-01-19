@@ -5,12 +5,17 @@ import { uid } from "uid";
 import { collection, addDoc } from "firebase/firestore";
 
 import db from "@/firebase/firebaseInit.js";
+import AppLoading from "@/components/AppLoading.vue";
 
 export default {
   name: "Invoice Modal",
+  components: {
+    AppLoading,
+  },
   setup() {
     const store = useStore();
     const state = reactive({
+      isLoading: false,
       billerStreetAddress: "",
       billerCity: "",
       billerZipCode: "",
@@ -71,6 +76,8 @@ export default {
         alert("Please ensure you've filled out work items");
         return;
       }
+
+      state.isLoading = true;
       calcInvoiceTotal();
 
       const invoiceCollectionRef = collection(db, "invoices");
@@ -80,6 +87,7 @@ export default {
         ...state,
       });
 
+      state.isLoading = false;
       store.commit("TOGGLE_INVOICE_MODAL");
     }
 
@@ -124,6 +132,7 @@ export default {
 <template>
   <div class="invoice-wrap flex flex-column">
     <form @submit.prevent="handleSubmitForm" class="invoice-content">
+      <AppLoading v-show="isLoading" />
       <h1>New Invoice</h1>
 
       <!-- bill from section -->
@@ -250,8 +259,8 @@ export default {
         <div class="input flex flex-column">
           <label for="paymentTerms">Payment Terms</label>
           <select required id="paymentTerms" v-model="paymentTerms">
-            <option value="30">Net 30 days</option>
-            <option value="60">Net 60 days</option>
+            <option value="30">Next 30 days</option>
+            <option value="60">Next 60 days</option>
           </select>
         </div>
 
