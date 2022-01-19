@@ -1,5 +1,5 @@
 <script>
-import { reactive, toRefs } from "vue";
+import { reactive, toRefs, watch } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -7,6 +7,7 @@ export default {
   setup() {
     const store = useStore();
     const state = reactive({
+      dateOptions: { year: "numeric", month: "short", day: "numeric" },
       billerStreetAddress: "",
       billerCity: "",
       billerZipCode: "",
@@ -33,7 +34,21 @@ export default {
     state.invoiceDateUnix = Date.now();
     state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
       "en-US",
-      { year: "numeric", month: "short", day: "numeric" }
+      state.dateOptions
+    );
+
+    // update paymentDueDate based on changes to paymentTerms
+    watch(
+      () => state.paymentTerms,
+      (paymentTerms) => {
+        const futureDate = new Date();
+        state.paymentDueDateUnix = futureDate.setDate(
+          futureDate.getDate() + parseInt(paymentTerms)
+        );
+        state.paymentDueDate = new Date(
+          state.paymentDueDateUnix
+        ).toLocaleDateString("en-US", state.dateOptions);
+      }
     );
 
     return {
