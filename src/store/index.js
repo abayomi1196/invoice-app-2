@@ -10,6 +10,7 @@ export default createStore({
     invoiceList: [],
     invoicesLoaded: false,
   },
+
   mutations: {
     TOGGLE_INVOICE_MODAL(state) {
       state.isInvoiceModalOpen = !state.isInvoiceModalOpen;
