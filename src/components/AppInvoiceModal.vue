@@ -42,8 +42,6 @@ export default {
 
     const invoiceWrapper = ref(null);
 
-    console.log(invoiceWrapper.value);
-
     function addNewInvoiceItem() {
       state.invoiceItemList.push({
         id: uid(),

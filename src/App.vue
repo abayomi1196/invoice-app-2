@@ -5,6 +5,7 @@ import { useStore } from "vuex";
 import AppNavigation from "@/components/AppNavigation.vue";
 import AppInvoiceModal from "@/components/AppInvoiceModal.vue";
 import AppModal from "@/components/AppModal.vue";
+import AppLoading from "./components/AppLoading.vue";
 
 export default {
   name: "App",
@@ -12,6 +13,7 @@ export default {
     AppNavigation,
     AppInvoiceModal,
     AppModal,
+    AppLoading,
   },
   setup() {
     const store = useStore();
@@ -33,12 +35,16 @@ export default {
     onMounted(() => {
       checkScreen();
       window.addEventListener("resize", checkScreen);
+
+      // get invoices
+      store.dispatch("GET_INVOICES");
     });
 
     return {
       ...toRefs(state),
       isInvoiceModalOpen: computed(() => store.state.isInvoiceModalOpen),
       isModalOpen: computed(() => store.state.isModalOpen),
+      isInvoicesLoaded: computed(() => store.state.invoicesLoaded),
     };
   },
 };
@@ -46,22 +52,25 @@ export default {
 
 <template>
   <div>
-    <div v-if="!isMobile" class="app flex">
-      <AppNavigation />
+    <AppLoading v-if="!isInvoicesLoaded" />
+    <div>
+      <div v-if="!isMobile" class="app flex">
+        <AppNavigation />
 
-      <div class="app-content flex flex-column">
-        <router-view />
+        <div class="app-content flex flex-column">
+          <router-view />
 
-        <AppModal v-if="isModalOpen" />
-        <transition name="invoice">
-          <AppInvoiceModal v-if="isInvoiceModalOpen" />
-        </transition>
+          <AppModal v-if="isModalOpen" />
+          <transition name="invoice">
+            <AppInvoiceModal v-if="isInvoiceModalOpen" />
+          </transition>
+        </div>
       </div>
-    </div>
 
-    <div v-else class="mobile-message flex flex-column">
-      <h2>Sorry, this app is not supported on mobile devices!</h2>
-      <p>To use this app, please use a computer or tablet!</p>
+      <div v-else class="mobile-message flex flex-column">
+        <h2>Sorry, this app is not supported on mobile devices!</h2>
+        <p>To use this app, please use a computer or tablet!</p>
+      </div>
     </div>
   </div>
 </template>
