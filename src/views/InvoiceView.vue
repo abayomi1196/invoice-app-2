@@ -9,12 +9,21 @@ export default {
     const store = useStore();
     const route = useRoute();
 
+    function toggleEditInvoice() {
+      store.commit("TOGGLE_EDIT_INVOICE");
+      store.commit("TOGGLE_INVOICE_MODAL");
+    }
+
     return {
-      currentInvoiceItem: computed(() =>
-        store.state.invoiceList.find(
+      currentInvoiceItem: computed(() => {
+        const item = store.state.invoiceList.find(
           (invoice) => invoice.invoiceId === route.params.invoiceId
-        )
-      ),
+        );
+
+        store.commit("SET_SELECTED_INVOICE", item);
+        return item;
+      }),
+      toggleEditInvoice,
     };
   },
 };
@@ -46,12 +55,7 @@ export default {
       </div>
 
       <div class="right flex">
-        <button
-          @click="toggleEditInvoice(currentInvoiceItem.docId)"
-          class="dark-purple"
-        >
-          Edit
-        </button>
+        <button @click="toggleEditInvoice" class="dark-purple">Edit</button>
 
         <button @click="deleteInvoice(currentInvoiceItem.docId)" class="red">
           Delete

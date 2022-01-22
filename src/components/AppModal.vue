@@ -13,6 +13,7 @@ export default {
     function closeInvoice() {
       store.commit("TOGGLE_MODAL");
       store.commit("TOGGLE_INVOICE_MODAL");
+      store.state.isEditInvoice && store.commit("TOGGLE_EDIT_INVOICE");
     }
 
     return {

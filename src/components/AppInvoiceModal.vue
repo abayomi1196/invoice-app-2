@@ -1,5 +1,5 @@
 <script>
-import { reactive, toRefs, watch, ref } from "vue";
+import { reactive, toRefs, watch, ref, computed } from "vue";
 import { useStore } from "vuex";
 import { uid } from "uid";
 import { collection, addDoc } from "firebase/firestore";
@@ -15,6 +15,7 @@ export default {
   setup() {
     const store = useStore();
     const state = reactive({
+      docId: null,
       isLoading: false,
       billerStreetAddress: "",
       billerCity: "",
@@ -93,16 +94,47 @@ export default {
       store.commit("TOGGLE_INVOICE_MODAL");
     }
 
+    async function updateInvoice() {
+      if (state.invoiceItemList.length <= 0) {
+        alert("Please ensure you've filled out work items");
+        return;
+      }
+
+      state.isLoading = true;
+      calcInvoiceTotal();
+
+      await store.dispatch("UPDATE_INVOICE", state);
+      state.isLoading = true;
+
+      store.commit("TOGGLE_INVOICE_MODAL");
+    }
+
     function handleSubmitForm() {
+      if (this.isEditInvoice) {
+        updateInvoice();
+        return;
+      }
+
       uploadInvoice();
     }
 
-    // get current date for invoice date field
-    state.invoiceDateUnix = Date.now();
-    state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
-      "en-US",
-      dateOptions
-    );
+    // get current date for invoice date field if we aren't editing
+    if (!store.state.isEditInvoice) {
+      state.invoiceDateUnix = Date.now();
+      state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
+        "en-US",
+        dateOptions
+      );
+    } else {
+      //else populate form with selectedInvoice data
+      state.docId = store.state.selectedInvoice.docId;
+
+      Object.keys(state).forEach((item) => {
+        if (item !== "isLoading") {
+          state[item] = store.state.selectedInvoice[item];
+        }
+      });
+    }
 
     // update paymentDueDate based on changes to paymentTerms
     watch(
@@ -125,6 +157,11 @@ export default {
       }
     }
 
+    function handleCancel() {
+      store.commit("TOGGLE_INVOICE_MODAL");
+      store.state.isEditInvoice && store.commit("TOGGLE_EDIT_INVOICE");
+    }
+
     return {
       ...toRefs(state),
       addNewInvoiceItem,
@@ -134,7 +171,8 @@ export default {
       handleSubmitForm,
       checkClick,
       invoiceWrapper,
-      closeInvoice: () => store.commit("TOGGLE_INVOICE_MODAL"),
+      handleCancel,
+      isEditInvoice: computed(() => store.state.isEditInvoice),
     };
   },
 };
@@ -148,7 +186,7 @@ export default {
   >
     <form @submit.prevent="handleSubmitForm" class="invoice-content">
       <AppLoading v-show="isLoading" />
-      <h1>New Invoice</h1>
+      <h1>{{ isEditInvoice ? "Edit Invoice" : "New Invoice" }}</h1>
 
       <!-- bill from section -->
       <div class="bill-from flex flex-column">
@@ -340,18 +378,32 @@ export default {
       <!-- save/exit buttons -->
       <div class="save flex">
         <div class="left">
-          <button type="button" @click="closeInvoice" class="red">
+          <button type="button" @click="handleCancel" class="red">
             Cancel
           </button>
         </div>
 
         <div class="right flex">
-          <button type="submit" @click="saveDraft" class="dark-purple">
+          <button
+            v-if="!isEditInvoice"
+            type="submit"
+            @click="saveDraft"
+            class="dark-purple"
+          >
             Save Draft
           </button>
 
-          <button type="submit" @click="publishInvoice" class="purple">
+          <button
+            v-if="!isEditInvoice"
+            type="submit"
+            @click="publishInvoice"
+            class="purple"
+          >
             Create Invoice
+          </button>
+
+          <button v-if="isEditInvoice" type="submit" class="purple">
+            Update Invoice
           </button>
         </div>
       </div>

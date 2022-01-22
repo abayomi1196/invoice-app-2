@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 
 import db from "@/firebase/firebaseInit";
 
@@ -9,6 +9,8 @@ export default createStore({
     isModalOpen: false,
     invoiceList: [],
     invoicesLoaded: false,
+    isEditInvoice: false,
+    selectedInvoice: null,
   },
 
   mutations: {
@@ -23,6 +25,12 @@ export default createStore({
     },
     UPDATE_INVOICES_LOADED(state) {
       state.invoicesLoaded = true;
+    },
+    TOGGLE_EDIT_INVOICE(state) {
+      state.isEditInvoice = !state.isEditInvoice;
+    },
+    SET_SELECTED_INVOICE(state, payload) {
+      state.selectedInvoice = payload;
     },
   },
   actions: {
@@ -42,6 +50,15 @@ export default createStore({
         // if there is an error, reset invoiceList to its previous state
         commit("UPDATE_INVOICE_LIST", state.invoiceList);
       }
+    },
+    async UPDATE_INVOICE({ dispatch, state }, invoiceData) {
+      const collectionRef = collection(db, "invoices");
+
+      const invoiceRef = doc(collectionRef, state.selectedInvoice.docId);
+
+      await updateDoc(invoiceRef, invoiceData);
+
+      await dispatch("GET_INVOICES");
     },
   },
   modules: {},
