@@ -32,6 +32,34 @@ export default {
       router.push("/");
     }
 
+    async function updateStatusToPaid() {
+      state.isLoading = true;
+      try {
+        await store.dispatch("UPDATE_INVOICE", {
+          invoicePending: false,
+          invoicePaid: true,
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        state.isLoading = false;
+      }
+    }
+
+    async function updateStatusToPending() {
+      state.isLoading = true;
+      try {
+        await store.dispatch("UPDATE_INVOICE", {
+          invoicePending: true,
+          invoicePaid: false,
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        state.isLoading = false;
+      }
+    }
+
     return {
       currentInvoiceItem: computed(() => {
         const item = store.state.invoiceList.find(
@@ -43,6 +71,8 @@ export default {
       }),
       toggleEditInvoice,
       deleteInvoice,
+      updateStatusToPaid,
+      updateStatusToPending,
       ...toRefs(state),
     };
   },
@@ -85,7 +115,7 @@ export default {
 
         <button
           v-show="currentInvoiceItem.invoicePending"
-          @click="updateStatusToPaid(currentInvoiceItem.docId)"
+          @click="updateStatusToPaid()"
           class="green"
         >
           Mark as Paid
@@ -95,7 +125,7 @@ export default {
           v-show="
             currentInvoiceItem.invoiceDraft || currentInvoiceItem.invoicePaid
           "
-          @click="updateStatusToPending(currentInvoiceItem.docId)"
+          @click="updateStatusToPending()"
           class="orange"
         >
           Mark as Pending

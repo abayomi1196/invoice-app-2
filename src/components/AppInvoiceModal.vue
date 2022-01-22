@@ -15,7 +15,6 @@ export default {
   setup() {
     const store = useStore();
     const state = reactive({
-      docId: null,
       isLoading: false,
       billerStreetAddress: "",
       billerCity: "",
@@ -89,6 +88,8 @@ export default {
         invoiceId: uid(6),
         ...state,
       });
+
+      await store.dispatch("GET_INVOICES");
 
       state.isLoading = false;
       store.commit("TOGGLE_INVOICE_MODAL");
