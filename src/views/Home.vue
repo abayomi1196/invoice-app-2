@@ -1,5 +1,5 @@
 <script>
-import { computed } from "vue";
+import { computed, reactive } from "vue";
 import { useStore } from "vuex";
 
 import HomeHeader from "@/components/HomeHeader.vue";
@@ -16,8 +16,29 @@ export default {
   setup() {
     const store = useStore();
 
+    const state = reactive({
+      filterValue: "",
+    });
+
+    function handleFilterChange(filterType) {
+      state.filterValue = filterType;
+    }
+
     return {
-      invoiceList: computed(() => store.state.invoiceList),
+      invoiceList: computed(() => {
+        return store.state.invoiceList.filter((invoice) => {
+          if (state.filterValue === "Pending") {
+            return invoice.invoicePending === true;
+          }
+
+          if (state.filterValue === "Paid") {
+            return invoice.invoicePaid === true;
+          }
+
+          return invoice;
+        });
+      }),
+      handleFilterChange,
     };
   },
 };
@@ -26,7 +47,7 @@ export default {
 <template>
   <div class="home container">
     <!-- Header -->
-    <HomeHeader />
+    <HomeHeader @onFilterInvoiceChange="handleFilterChange" />
 
     <!-- Invoices -->
     <div v-if="invoiceList.length">

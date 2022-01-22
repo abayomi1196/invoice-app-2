@@ -1,25 +1,36 @@
 <script>
-import { reactive, toRefs } from "vue";
+import { computed, reactive, toRefs } from "vue";
 import { useStore } from "vuex";
 
 export default {
   name: "HomeHeader",
 
-  setup() {
+  setup(props, { emit }) {
     const store = useStore();
     const state = reactive({
       showFilterMenu: false,
-      toggleStatus: "Filter by status",
+      toggleStatus: "",
     });
 
     function toggleFilterMenu() {
       state.showFilterMenu = !state.showFilterMenu;
     }
 
+    function setFilteredInvoice(e) {
+      if (e.target.innerText === "Clear filter") {
+        state.toggleStatus = "";
+      } else {
+        state.toggleStatus = e.target.innerText;
+      }
+      emit("onFilterInvoiceChange", e.target.innerText);
+    }
+
     return {
       ...toRefs(state),
       toggleFilterMenu,
+      setFilteredInvoice,
       toggleInvoiceModal: () => store.commit("TOGGLE_INVOICE_MODAL"),
+      invoiceCount: computed(() => store.state.invoiceList.length),
     };
   },
 };
@@ -30,21 +41,21 @@ export default {
     <!-- LHS -->
     <div class="left flex flex-column">
       <h1>Invoices</h1>
-      <span>There are 3 total invoices</span>
+      <span>There is/are {{ invoiceCount }} total invoice(s)</span>
     </div>
 
     <!-- RHS -->
     <div class="right flex">
       <div class="filter flex" @click="toggleFilterMenu">
-        <span>{{ toggleStatus }}</span>
+        <span>Filter by status </span>
+        <span v-if="toggleStatus"> {{ ": " + toggleStatus }}</span>
 
         <img src="@/assets/icon-arrow-down.svg" alt="modal icon" />
 
         <ul v-if="showFilterMenu" class="filter-menu">
-          <li>Draft</li>
-          <li>Pending</li>
-          <li>Paid</li>
-          <li>Clear filter</li>
+          <li @click="setFilteredInvoice">Pending</li>
+          <li @click="setFilteredInvoice">Paid</li>
+          <li @click="setFilteredInvoice">Clear filter</li>
         </ul>
       </div>
 

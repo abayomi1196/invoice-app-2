@@ -33,7 +33,6 @@ export default {
       paymentDueDate: "",
       productDescription: "",
       invoicePending: false,
-      invoiceDraft: false,
       invoiceItemList: [],
       invoiceTotal: 0,
     });
@@ -385,15 +384,6 @@ export default {
         </div>
 
         <div class="right flex">
-          <button
-            v-if="!isEditInvoice"
-            type="submit"
-            @click="saveDraft"
-            class="dark-purple"
-          >
-            Save Draft
-          </button>
-
           <button
             v-if="!isEditInvoice"
             type="submit"
