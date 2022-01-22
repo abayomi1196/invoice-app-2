@@ -1,5 +1,11 @@
 import { createStore } from "vuex";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 import db from "@/firebase/firebaseInit";
 
@@ -57,6 +63,12 @@ export default createStore({
       const invoiceRef = doc(collectionRef, state.selectedInvoice.docId);
 
       await updateDoc(invoiceRef, invoiceData);
+
+      await dispatch("GET_INVOICES");
+    },
+
+    async DELETE_INVOICE({ dispatch }, docId) {
+      await deleteDoc(doc(db, "invoices", docId));
 
       await dispatch("GET_INVOICES");
     },

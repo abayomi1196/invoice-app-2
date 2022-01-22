@@ -1,17 +1,35 @@
 <script>
-import { computed } from "vue";
+import { computed, reactive, toRefs } from "vue";
 import { useStore } from "vuex";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+
+import AppLoading from "@/components/AppLoading.vue";
 
 export default {
   name: "Single Invoice View",
+  components: {
+    AppLoading,
+  },
   setup() {
     const store = useStore();
     const route = useRoute();
+    const router = useRouter();
+
+    const state = reactive({
+      isLoading: false,
+    });
 
     function toggleEditInvoice() {
       store.commit("TOGGLE_EDIT_INVOICE");
       store.commit("TOGGLE_INVOICE_MODAL");
+    }
+
+    async function deleteInvoice(docId) {
+      state.isLoading = true;
+      await store.dispatch("DELETE_INVOICE", docId);
+      state.isLoading = false;
+
+      router.push("/");
     }
 
     return {
@@ -24,6 +42,8 @@ export default {
         return item;
       }),
       toggleEditInvoice,
+      deleteInvoice,
+      ...toRefs(state),
     };
   },
 };
@@ -34,6 +54,8 @@ export default {
     <router-link class="nav-link flex" :to="{ name: 'Home' }">
       <img src="@/assets/icon-arrow-left.svg" alt="back img" /> Go Back
     </router-link>
+
+    <AppLoading v-if="isLoading" />
 
     <!-- header section -->
     <div class="header flex">
